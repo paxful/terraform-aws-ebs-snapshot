@@ -1,0 +1,13 @@
+# Editors etc
+*~
+*#
+.#*
+\#*#
+.*.sw[a-z]
+*.un~
+
+# python
+*.pyc
+
+# archive
+*.zip

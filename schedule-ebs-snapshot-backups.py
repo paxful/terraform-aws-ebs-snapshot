@@ -34,8 +34,6 @@ def lambda_handler(event, context):
 
     print "Found %d instances that need backing up" % len(instances)
 
-    to_tag = collections.defaultdict(list)
-
     for instance in instances:
         try:
             retention_days = [
@@ -48,14 +46,17 @@ def lambda_handler(event, context):
             if dev.get('Ebs', None) is None:
                 continue
             vol_id = dev['Ebs']['VolumeId']
-            print "Found EBS volume %s on instance %s" % (
-                vol_id, instance['InstanceId'])
+            try:
+                instance_name = [i for i in instance['Tags'] if i['Key'] == 'Name'][0]['Value']
+            except IndexError:
+                instance_name = instance['InstanceId']
+
+            print "Found EBS volume %s on instance %s (%s)" % (
+                vol_id, instance['InstanceId'], instance_name)
 
             snap = ec.create_snapshot(
                 VolumeId=vol_id,
             )
-
-            to_tag[retention_days].append(snap['SnapshotId'])
 
             print "Retaining snapshot %s of volume %s from instance %s for %d days" % (
                 snap['SnapshotId'],
@@ -64,14 +65,12 @@ def lambda_handler(event, context):
                 retention_days,
             )
 
-
-    for retention_days in to_tag.keys():
-        delete_date = datetime.date.today() + datetime.timedelta(days=retention_days)
-        delete_fmt = delete_date.strftime('%Y-%m-%d')
-        print "Will delete %d snapshots on %s" % (len(to_tag[retention_days]), delete_fmt)
-        ec.create_tags(
-            Resources=to_tag[retention_days],
-            Tags=[
-                {'Key': 'DeleteOn', 'Value': delete_fmt},
-            ]
-        )
+            delete_date = datetime.date.today() + datetime.timedelta(days=retention_days)
+            delete_fmt = delete_date.strftime('%Y-%m-%d')
+            ec.create_tags(
+                Resources=[snap['SnapshotId']],
+                Tags=[
+                    {'Key': 'DeleteOn', 'Value': delete_fmt},
+                    {'Key': 'Name', 'Value': instance_name},
+                ]
+            )
