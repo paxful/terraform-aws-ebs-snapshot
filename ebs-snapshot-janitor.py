@@ -61,6 +61,7 @@ def lambda_handler(event, context):
 
     # calculate time
     delete_time = datetime.datetime.utcnow() - datetime.timedelta(minutes=retention)
+    print "Configured retension %s" % delete_time
 
     # get all instaces with selected tag
     filters = [
@@ -72,6 +73,7 @@ def lambda_handler(event, context):
 
     for snap in snapshot_response['Snapshots']:
         delete_on = [i for i in snap['Tags'] if i['Key'] == 'DeleteOn'][0]['Value']
+        print "Checking snapshot %s with retension %s" % (snap['SnapshotId'], delete_on)
         # if delete time is more then create time, drop the snapshot
         if datetime.datetime.strptime(delete_on, '%Y-%m-%d-%H-%M') > delete_time:
             print "Deleting snapshot %s" % snap['SnapshotId']

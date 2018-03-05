@@ -73,7 +73,7 @@ def lambda_handler(event, context):
             delete_date = datetime.datetime.utcnow() + datetime.timedelta(minutes=retention)
             delete_fmt = delete_date.strftime('%Y-%m-%d-%H-%M')
 
-            print "Remove snapshot %s of volume %s from instance %s at %s" % (
+            print "Retaining snapshot %s of volume %s from instance %s at %s" % (
                 snap['SnapshotId'],
                 vol_id,
                 instance['InstanceId'],
