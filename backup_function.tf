@@ -70,7 +70,8 @@ resource "aws_lambda_function" "schedule_ebs_snapshot_backups" {
 
   environment {
     variables = {
-     BACKUP_TAG  = "${var.backup_tag}"
+      BACKUP_TAG  = "${var.backup_tag}"
+      BACKUP_RETENTION = "${var.retension}"
     }
   }
 }
@@ -90,6 +91,13 @@ resource "aws_lambda_function" "ebs_snapshot_janitor" {
   handler          = "ebs-snapshot-janitor.lambda_handler"
   runtime          = "python2.7"
   source_code_hash = "${data.archive_file.ebs_snapshot_janitor_zip.output_base64sha256}"
+
+  environment {
+    variables = {
+      BACKUP_TAG  = "${var.backup_tag}"
+      BACKUP_RETENTION = "${var.retension}"
+    }
+  }
 }
 
 resource "aws_cloudwatch_event_rule" "schedule_ebs_snapshot_backups" {

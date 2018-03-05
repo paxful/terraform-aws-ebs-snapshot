@@ -31,7 +31,7 @@ else:
 # calculate retention in minutes
 if 'd' in ret_period:
     retention = 24 * 60 * ret_period.split('d')[0]
-elif 'h' in retention_period:
+elif 'h' in ret_period:
     retention = 60 * ret_period.split('h')[0]
 else:
     retention = int(ret_period)
@@ -73,7 +73,7 @@ def lambda_handler(event, context):
             delete_date = datetime.datetime.utcnow() + datetime.timedelta(minutes=retention)
             delete_fmt = delete_date.strftime('%Y-%m-%d-%H-%M')
 
-            print "Remove snapshot %s of volume %s from instance %s at %d" % (
+            print "Remove snapshot %s of volume %s from instance %s at %s" % (
                 snap['SnapshotId'],
                 vol_id,
                 instance['InstanceId'],

@@ -12,3 +12,7 @@ variable "backup_tag" {
   description = "Set the tag that will be used to find instance for backup"
   default = "Backup"
 }
+variable "retension" {
+  description = "Set retension period"
+  default = "7d"
+}

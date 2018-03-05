@@ -38,7 +38,7 @@ else:
 # calculate retention in minutes
 if 'd' in ret_period:
     retention = 24 * 60 * ret_period.split('d')[0]
-elif 'h' in retention_period:
+elif 'h' in ret_period:
     retention = 60 * ret_period.split('h')[0]
 else:
     retention = int(ret_period)
@@ -64,8 +64,8 @@ def lambda_handler(event, context):
 
     # get all instaces with selected tag
     filters = [
-        {'Name': 'tag-key', 'Values': ['DeleteOn', 'BackupTag']},
-        {'Key': 'BackupTag', 'Value': tag},
+        {'Name': 'tag-key', 'Values': ['BackupTag']},
+        {'Name': 'tag-value', 'Values': [tag]},
     ]
     snapshot_response = ec.describe_snapshots(OwnerIds=account_ids, Filters=filters)
 
