@@ -12,7 +12,18 @@ variable "backup_tag" {
   description = "Set the tag that will be used to find instance for backup"
   default = "Backup"
 }
+
 variable "retension" {
   description = "Set retension period"
   default = "7d"
+}
+
+variable "backup_lambda_name" {
+  description = "Set name for backup lambda func"
+  default = "schedule_ebs_snapshot_backups"
+}
+
+variable "retension_lambda_name" {
+  description = "Set name for retension lambda func"
+  default = "ebs_snapshot_janitor"
 }

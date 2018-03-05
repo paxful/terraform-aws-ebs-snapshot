@@ -60,11 +60,11 @@ data "archive_file" "schedule_ebs_snapshot_backups_zip" {
 
 resource "aws_lambda_function" "schedule_ebs_snapshot_backups" {
   filename         = "${path.module}/schedule-ebs-snapshot-backups.zip"
-  function_name    = "schedule_ebs_snapshot_backups"
+  function_name    = "${var.backup_lambda_name}"
   description      = "Automatically backs up instances tagged with backup: true"
   role             = "${aws_iam_role.ebs_backup_role.arn}"
   timeout          = 60
-  handler          = "schedule-ebs-snapshot-backups.lambda_handler"
+  handler          = "${var.backup_lambda_name}.lambda_handler"
   runtime          = "python2.7"
   source_code_hash = "${data.archive_file.schedule_ebs_snapshot_backups_zip.output_base64sha256}"
 
@@ -84,11 +84,11 @@ data "archive_file" "ebs_snapshot_janitor_zip" {
 
 resource "aws_lambda_function" "ebs_snapshot_janitor" {
   filename         = "${path.module}/ebs-snapshot-janitor.zip"
-  function_name    = "ebs_snapshot_janitor"
+  function_name    = "${var.retension_lambda_name}"
   description      = "Cleans up old EBS backups"
   role             = "${aws_iam_role.ebs_backup_role.arn}"
   timeout          = 60
-  handler          = "ebs-snapshot-janitor.lambda_handler"
+  handler          = "${var.retension_lambda_name}.lambda_handler"
   runtime          = "python2.7"
   source_code_hash = "${data.archive_file.ebs_snapshot_janitor_zip.output_base64sha256}"
 
