@@ -14,13 +14,19 @@
 import boto3
 import collections
 import datetime
+import os
 
 ec = boto3.client('ec2')
+
+if 'BACKUP_TAG' in os.environ:
+    tag = os.environ['BACKUP_TAG']
+else:
+    tag = 'Backup'
 
 def lambda_handler(event, context):
     reservations = ec.describe_instances(
         Filters=[
-            {'Name': 'tag:Backup', 'Values': ['true', 'yes', '1']},
+            {'Name': 'tag:%s' % tag, 'Values': ['true', 'yes', '1']},
         ]
     ).get(
         'Reservations', []
@@ -32,7 +38,7 @@ def lambda_handler(event, context):
             for r in reservations
         ], [])
 
-    print "Found %d instances that need backing up" % len(instances)
+    print "Found %d instances with tag %s that need backing up" % (len(instances), tag)
 
     for instance in instances:
         try:

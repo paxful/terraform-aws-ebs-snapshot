@@ -7,3 +7,8 @@ variable "ebs_snapshot_backups_schedule" {
 variable "ebs_snapshot_janitor_schedule" {
   default = "cron(05 19 * * ? *)"
 }
+
+variable "backup_tag" {
+  description = "Set the tag that will be used to find instance for backup"
+  default = "Backup"
+}

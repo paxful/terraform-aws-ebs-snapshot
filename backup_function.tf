@@ -67,6 +67,12 @@ resource "aws_lambda_function" "schedule_ebs_snapshot_backups" {
   handler          = "schedule-ebs-snapshot-backups.lambda_handler"
   runtime          = "python2.7"
   source_code_hash = "${data.archive_file.schedule_ebs_snapshot_backups_zip.output_base64sha256}"
+
+  environment {
+    variables = {
+     BACKUP_TAG  = "${var.backup_tag}"
+    }
+  }
 }
 
 data "archive_file" "ebs_snapshot_janitor_zip" {
