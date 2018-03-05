@@ -1,5 +1,5 @@
 resource "aws_iam_role" "ebs_backup_role" {
-  name = "ebs_backup_role"
+  name = "lambda-${var.backup_tag}-role"
 
   assume_role_policy = <<EOF
 {
@@ -101,31 +101,31 @@ resource "aws_lambda_function" "ebs_snapshot_janitor" {
 }
 
 resource "aws_cloudwatch_event_rule" "schedule_ebs_snapshot_backups" {
-  name                = "schedule_ebs_snapshot_backups"
+  name                = "${var.backup_lambda_name}"
   description         = "Schedule for ebs snapshot backups"
   schedule_expression = "${var.ebs_snapshot_backups_schedule}"
 }
 
 resource "aws_cloudwatch_event_rule" "schedule_ebs_snapshot_janitor" {
-  name                = "schedule_ebs_snapshot_janitor"
+  name                = "${var.retension_lambda_name}"
   description         = "Schedule for ebs snapshot janitor"
   schedule_expression = "${var.ebs_snapshot_janitor_schedule}"
 }
 
 resource "aws_cloudwatch_event_target" "schedule_ebs_snapshot_backups" {
   rule      = "${aws_cloudwatch_event_rule.schedule_ebs_snapshot_backups.name}"
-  target_id = "schedule_ebs_snapshot_backups"
+  target_id = "${var.backup_lambda_name}"
   arn       = "${aws_lambda_function.schedule_ebs_snapshot_backups.arn}"
 }
 
 resource "aws_cloudwatch_event_target" "schedule_ebs_snapshot_janitor" {
   rule      = "${aws_cloudwatch_event_rule.schedule_ebs_snapshot_janitor.name}"
-  target_id = "ebs_snapshot_janitor"
+  target_id = "${var.retension_lambda_name}"
   arn       = "${aws_lambda_function.ebs_snapshot_janitor.arn}"
 }
 
 resource "aws_lambda_permission" "allow_cloudwatch_to_call_backup" {
-  statement_id  = "AllowExecutionFromCloudWatch_schedule_ebs_snapshot_backups"
+  statement_id  = "AllowExecutionFromCloudWatch_${var.backup_lambda_name}"
   action        = "lambda:InvokeFunction"
   function_name = "${aws_lambda_function.schedule_ebs_snapshot_backups.function_name}"
   principal     = "events.amazonaws.com"
@@ -133,7 +133,7 @@ resource "aws_lambda_permission" "allow_cloudwatch_to_call_backup" {
 }
 
 resource "aws_lambda_permission" "allow_cloudwatch_to_call_janitor" {
-  statement_id  = "AllowExecutionFromCloudWatch_ebs_snapshot_janitor"
+  statement_id  = "AllowExecutionFromCloudWatch_${var.retension_lambda_name}"
   action        = "lambda:InvokeFunction"
   function_name = "${aws_lambda_function.ebs_snapshot_janitor.function_name}"
   principal     = "events.amazonaws.com"
