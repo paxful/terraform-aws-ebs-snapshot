@@ -18,10 +18,23 @@ import os
 
 ec = boto3.client('ec2')
 
-if 'BACKUP_TAG' in os.environ:
-    tag = os.environ['BACKUP_TAG']
+if 'BACKUP_CREATION_TAG' in os.environ:
+    tag = os.environ['BACKUP_CREATION_TAG']
 else:
     tag = 'Backup'
+
+if 'BACKUP_RETENTION_TAG' in os.environ:
+    ret_period = os.environ['BACKUP_RETENTION_TAG']
+else:
+    ret_period = '7'
+
+# calculate retention in minutes
+if 'd' in ret_period:
+    retention = 24 * 60 * ret_period.split('d')[0]
+elif 'h' in retention_period:
+    retention = 60 * ret_period.split('h')[0]
+else:
+    retention = int(ret_period)
 
 def lambda_handler(event, context):
     reservations = ec.describe_instances(
@@ -41,13 +54,6 @@ def lambda_handler(event, context):
     print "Found %d instances with tag %s that need backing up" % (len(instances), tag)
 
     for instance in instances:
-        try:
-            retention_days = [
-                int(t.get('Value')) for t in instance['Tags']
-                if t['Key'] == 'Retention'][0]
-        except IndexError:
-            retention_days = 7
-
         for dev in instance['BlockDeviceMappings']:
             if dev.get('Ebs', None) is None:
                 continue
@@ -64,18 +70,20 @@ def lambda_handler(event, context):
                 VolumeId=vol_id,
             )
 
-            print "Retaining snapshot %s of volume %s from instance %s for %d days" % (
+            delete_date = datetime.datetime.utcnow() + datetime.timedelta(minutes=retention)
+            delete_fmt = delete_date.strftime('%Y-%m-%d-%H-%M')
+
+            print "Remove snapshot %s of volume %s from instance %s at %d" % (
                 snap['SnapshotId'],
                 vol_id,
                 instance['InstanceId'],
-                retention_days,
+                delete_fmt,
             )
 
-            delete_date = datetime.date.today() + datetime.timedelta(days=retention_days)
-            delete_fmt = delete_date.strftime('%Y-%m-%d')
             ec.create_tags(
                 Resources=[snap['SnapshotId']],
                 Tags=[
+                    {'Key': 'BackupTag', 'Value': tag},
                     {'Key': 'DeleteOn', 'Value': delete_fmt},
                     {'Key': 'Name', 'Value': instance_name},
                 ]

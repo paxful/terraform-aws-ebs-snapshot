@@ -14,6 +14,7 @@
 import boto3
 import re
 import datetime
+import os
 
 ec = boto3.client('ec2')
 iam = boto3.client('iam')
@@ -23,6 +24,24 @@ This function looks at *all* snapshots that have a "DeleteOn" tag containing
 the current day formatted as YYYY-MM-DD. This function should be run at least
 daily.
 """
+
+if 'BACKUP_CREATION_TAG' in os.environ:
+    tag = os.environ['BACKUP_CREATION_TAG']
+else:
+    tag = 'Backup'
+
+if 'BACKUP_RETENTION_TAG' in os.environ:
+    ret_period = os.environ['BACKUP_RETENTION_TAG']
+else:
+    ret_period = '7'
+
+# calculate retention in minutes
+if 'd' in ret_period:
+    retention = 24 * 60 * ret_period.split('d')[0]
+elif 'h' in retention_period:
+    retention = 60 * ret_period.split('h')[0]
+else:
+    retention = int(ret_period)
 
 def lambda_handler(event, context):
     account_ids = list()
@@ -40,14 +59,20 @@ def lambda_handler(event, context):
         account_ids.append(re.search(r'(arn:aws:sts::)([0-9]+)', str(e)).groups()[1])
 
 
-    delete_on = datetime.date.today().strftime('%Y-%m-%d')
+    # calculate time
+    delete_time = datetime.datetime.utcnow() - datetime.timedelta(minutes=retention)
+
+    # get all instaces with selected tag
     filters = [
-        {'Name': 'tag-key', 'Values': ['DeleteOn']},
-        {'Name': 'tag-value', 'Values': [delete_on]},
+        {'Name': 'tag-key', 'Values': ['DeleteOn', 'BackupTag']},
+        {'Key': 'BackupTag', 'Value': tag},
     ]
     snapshot_response = ec.describe_snapshots(OwnerIds=account_ids, Filters=filters)
 
 
     for snap in snapshot_response['Snapshots']:
-        print "Deleting snapshot %s" % snap['SnapshotId']
-        ec.delete_snapshot(SnapshotId=snap['SnapshotId'])
+        delete_on = [i for i in snap['Tags'] if i['Key'] == 'DeleteOn'][0]['Value']
+        # if delete time is more then create time, drop the snapshot
+        if datetime.datetime.strptime(delete_on, '%Y-%m-%d-%H-%M') > delete_time:
+            print "Deleting snapshot %s" % snap['SnapshotId']
+            ec.delete_snapshot(SnapshotId=snap['SnapshotId'])
