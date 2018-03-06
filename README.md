@@ -16,6 +16,11 @@ module "lambda_ebs_snapshot" {
   # Setting these variables is optional
   # ebs_snapshot_backups_schedule = "cron(00 19 * * ? *)"
   # ebs_snapshot_janitor_schedule = "cron(05 19 * * ? *)"
+  # backup_tag                    = "Backup"
+  # backup_lambda_name            = "schedule_ebs_snapshot_backups"
+  # retension_lambda_name         = "ebs_snapshot_janitor"
+  # examples 7d, 2h, 60
+  # retension                     = "7d"
 }
 ```
 
