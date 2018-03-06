@@ -25,21 +25,22 @@ the current day formatted as YYYY-MM-DD. This function should be run at least
 daily.
 """
 
-if 'BACKUP_CREATION_TAG' in os.environ:
-    tag = os.environ['BACKUP_CREATION_TAG']
+
+if 'BACKUP_TAG' in os.environ:
+    tag = os.environ['BACKUP_TAG']
 else:
     tag = 'Backup'
 
-if 'BACKUP_RETENTION_TAG' in os.environ:
-    ret_period = os.environ['BACKUP_RETENTION_TAG']
+if 'BACKUP_RETENTION' in os.environ:
+    ret_period = os.environ['BACKUP_RETENTION']
 else:
     ret_period = '7'
 
 # calculate retention in minutes
 if 'd' in ret_period:
-    retention = 24 * 60 * ret_period.split('d')[0]
+    retention = 24 * 60 * int(ret_period.split('d')[0])
 elif 'h' in ret_period:
-    retention = 60 * ret_period.split('h')[0]
+    retention = 60 * int(ret_period.split('h')[0])
 else:
     retention = int(ret_period)
 
