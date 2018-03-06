@@ -30,9 +30,9 @@ else:
 
 # calculate retention in minutes
 if 'd' in ret_period:
-    retention = 24 * 60 * ret_period.split('d')[0]
+    retention = 24 * 60 * int(ret_period.split('d')[0])
 elif 'h' in ret_period:
-    retention = 60 * ret_period.split('h')[0]
+    retention = 60 * int(ret_period.split('h')[0])
 else:
     retention = int(ret_period)
 
