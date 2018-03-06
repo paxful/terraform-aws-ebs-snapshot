@@ -18,13 +18,13 @@ import os
 
 ec = boto3.client('ec2')
 
-if 'BACKUP_CREATION_TAG' in os.environ:
-    tag = os.environ['BACKUP_CREATION_TAG']
+if 'BACKUP_TAG' in os.environ:
+    tag = os.environ['BACKUP_TAG']
 else:
     tag = 'Backup'
 
-if 'BACKUP_RETENTION_TAG' in os.environ:
-    ret_period = os.environ['BACKUP_RETENTION_TAG']
+if 'BACKUP_RETENTION' in os.environ:
+    ret_period = os.environ['BACKUP_RETENTION']
 else:
     ret_period = '7'
 
