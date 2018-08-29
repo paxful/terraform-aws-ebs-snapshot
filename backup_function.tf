@@ -34,6 +34,7 @@ resource "aws_iam_role_policy" "ebs_backup_policy" {
         {
             "Effect": "Allow",
             "Action": "ec2:Describe*",
+            "Action": "iam:GetUser",
             "Resource": "*"
         },
         {
@@ -70,7 +71,7 @@ resource "aws_lambda_function" "schedule_ebs_snapshot_backups" {
 
   environment {
     variables = {
-      BACKUP_TAG  = "${var.backup_tag}"
+      BACKUP_TAG       = "${var.backup_tag}"
       BACKUP_RETENTION = "${var.retension}"
     }
   }
@@ -94,7 +95,7 @@ resource "aws_lambda_function" "ebs_snapshot_janitor" {
 
   environment {
     variables = {
-      BACKUP_TAG  = "${var.backup_tag}"
+      BACKUP_TAG       = "${var.backup_tag}"
       BACKUP_RETENTION = "${var.retension}"
     }
   }
