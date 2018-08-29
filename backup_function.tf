@@ -33,8 +33,7 @@ resource "aws_iam_role_policy" "ebs_backup_policy" {
         },
         {
             "Effect": "Allow",
-            "Action": "ec2:Describe*",
-            "Action": "iam:GetUser",
+            "Action": ["ec2:Describe*", "iam:GetUser"]
             "Resource": "*"
         },
         {
