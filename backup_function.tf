@@ -33,7 +33,7 @@ resource "aws_iam_role_policy" "ebs_backup_policy" {
         },
         {
             "Effect": "Allow",
-            "Action": ["ec2:Describe*", "iam:GetUser"],
+            "Action": "ec2:Describe*",
             "Resource": "*"
         },
         {
@@ -71,7 +71,7 @@ resource "aws_lambda_function" "schedule_ebs_snapshot_backups" {
   environment {
     variables = {
       BACKUP_TAG       = "${var.backup_tag}"
-      BACKUP_RETENTION = "${var.retension}"
+      BACKUP_RETENTION = "${var.retention}"
     }
   }
 }
@@ -84,7 +84,7 @@ data "archive_file" "ebs_snapshot_janitor_zip" {
 
 resource "aws_lambda_function" "ebs_snapshot_janitor" {
   filename         = "${path.module}/ebs-snapshot-janitor.zip"
-  function_name    = "${var.retension_lambda_name}"
+  function_name    = "${var.retention_lambda_name}"
   description      = "Cleans up old EBS backups"
   role             = "${aws_iam_role.ebs_backup_role.arn}"
   timeout          = 60
@@ -95,7 +95,7 @@ resource "aws_lambda_function" "ebs_snapshot_janitor" {
   environment {
     variables = {
       BACKUP_TAG       = "${var.backup_tag}"
-      BACKUP_RETENTION = "${var.retension}"
+      BACKUP_RETENTION = "${var.retention}"
     }
   }
 }
@@ -107,7 +107,7 @@ resource "aws_cloudwatch_event_rule" "schedule_ebs_snapshot_backups" {
 }
 
 resource "aws_cloudwatch_event_rule" "schedule_ebs_snapshot_janitor" {
-  name                = "${var.retension_lambda_name}"
+  name                = "${var.retention_lambda_name}"
   description         = "Schedule for ebs snapshot janitor"
   schedule_expression = "${var.ebs_snapshot_janitor_schedule}"
 }
@@ -120,7 +120,7 @@ resource "aws_cloudwatch_event_target" "schedule_ebs_snapshot_backups" {
 
 resource "aws_cloudwatch_event_target" "schedule_ebs_snapshot_janitor" {
   rule      = "${aws_cloudwatch_event_rule.schedule_ebs_snapshot_janitor.name}"
-  target_id = "${var.retension_lambda_name}"
+  target_id = "${var.retention_lambda_name}"
   arn       = "${aws_lambda_function.ebs_snapshot_janitor.arn}"
 }
 
@@ -133,7 +133,7 @@ resource "aws_lambda_permission" "allow_cloudwatch_to_call_backup" {
 }
 
 resource "aws_lambda_permission" "allow_cloudwatch_to_call_janitor" {
-  statement_id  = "AllowExecutionFromCloudWatch_${var.retension_lambda_name}"
+  statement_id  = "AllowExecutionFromCloudWatch_${var.retention_lambda_name}"
   action        = "lambda:InvokeFunction"
   function_name = "${aws_lambda_function.ebs_snapshot_janitor.function_name}"
   principal     = "events.amazonaws.com"
