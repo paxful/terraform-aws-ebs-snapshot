@@ -6,21 +6,23 @@ the code at
 <https://serverlesscode.com/post/lambda-schedule-ebs-snapshot-backups/> and
 <https://serverlesscode.com/post/lambda-schedule-ebs-snapshot-backups-2/>.
 
+This is a fork of [chef/lambda_ebs_snapshot](https://github.com/chef/lambda_ebs_snapshot)
+
 ## Usage
 
 Include this repository as a module in your existing terraform code:
 
-```
+```hcl
 module "lambda_ebs_snapshot" {
-  source = "github.com/chef/lambda_ebs_snapshot"
+  source = "github.com/paxful/terraform-aws-ebs-snapshot"
   # Setting these variables is optional
   # ebs_snapshot_backups_schedule = "cron(00 19 * * ? *)"
   # ebs_snapshot_janitor_schedule = "cron(05 19 * * ? *)"
   # backup_tag                    = "Backup"
   # backup_lambda_name            = "schedule_ebs_snapshot_backups"
-  # retension_lambda_name         = "ebs_snapshot_janitor"
+  # retention_lambda_name         = "ebs_snapshot_janitor"
   # examples 7d, 2h, 60
-  # retension                     = "7d"
+  # retention                     = "7d"
 }
 ```
 

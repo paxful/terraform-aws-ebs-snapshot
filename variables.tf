@@ -10,20 +10,20 @@ variable "ebs_snapshot_janitor_schedule" {
 
 variable "backup_tag" {
   description = "Set the tag that will be used to find instance for backup"
-  default = "Backup"
+  default     = "Backup"
 }
 
-variable "retension" {
-  description = "Set retension period"
-  default = "7d"
+variable "retention" {
+  description = "Set retention period"
+  default     = "7d"
 }
 
 variable "backup_lambda_name" {
   description = "Set name for backup lambda func"
-  default = "schedule_ebs_snapshot_backups"
+  default     = "schedule_ebs_snapshot_backups"
 }
 
-variable "retension_lambda_name" {
-  description = "Set name for retension lambda func"
-  default = "ebs_snapshot_janitor"
+variable "retention_lambda_name" {
+  description = "Set name for retention lambda func"
+  default     = "ebs_snapshot_janitor"
 }
