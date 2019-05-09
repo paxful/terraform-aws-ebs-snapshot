@@ -27,3 +27,8 @@ variable "retention_lambda_name" {
   description = "Set name for retention lambda func"
   default     = "ebs_snapshot_janitor"
 }
+
+variable "iam_role_name" {
+  description = "Set name for iam role"
+  default     = "lambda-backup-role"
+}

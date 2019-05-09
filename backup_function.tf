@@ -1,5 +1,5 @@
 resource "aws_iam_role" "ebs_backup_role" {
-  name = "lambda-${var.backup_tag}-role"
+  name = "${var.iam_role_name}"
 
   assume_role_policy = <<EOF
 {
