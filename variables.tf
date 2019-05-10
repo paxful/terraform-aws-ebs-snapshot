@@ -35,7 +35,7 @@ variable "iam_role_name" {
 
 variable "iam_role" {
   description = "Set predefined IAM role"
-  default     = true
+  default     = ""
 }
 
 variable "create_iam_role" {
