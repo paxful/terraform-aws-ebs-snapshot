@@ -1,5 +1,6 @@
 resource "aws_iam_role" "ebs_backup_role" {
-  name = "${var.iam_role_name}"
+  count = "${var.create_iam_role}"
+  name  = "${var.iam_role_name}"
 
   assume_role_policy = <<EOF
 {
@@ -19,8 +20,9 @@ EOF
 }
 
 resource "aws_iam_role_policy" "ebs_backup_policy" {
-  name = "ebs_backup_policy"
-  role = "${aws_iam_role.ebs_backup_role.id}"
+  count = "${var.create_iam_role}"
+  name  = "ebs_backup_policy"
+  role  = "${aws_iam_role.ebs_backup_role.id}"
 
   policy = <<EOF
 {
@@ -62,7 +64,7 @@ resource "aws_lambda_function" "schedule_ebs_snapshot_backups" {
   filename         = "${path.module}/schedule-ebs-snapshot-backups.zip"
   function_name    = "${var.backup_lambda_name}"
   description      = "Automatically backs up instances tagged with backup: true"
-  role             = "${aws_iam_role.ebs_backup_role.arn}"
+  role             = "${var.create_iam_role ? aws_iam_role.ebs_backup_role.arn : var.iam_role}"
   timeout          = 60
   handler          = "schedule-ebs-snapshot-backups.lambda_handler"
   runtime          = "python2.7"
@@ -86,7 +88,7 @@ resource "aws_lambda_function" "ebs_snapshot_janitor" {
   filename         = "${path.module}/ebs-snapshot-janitor.zip"
   function_name    = "${var.retention_lambda_name}"
   description      = "Cleans up old EBS backups"
-  role             = "${aws_iam_role.ebs_backup_role.arn}"
+  role             = "${var.create_iam_role ? aws_iam_role.ebs_backup_role.arn : var.iam_role}"
   timeout          = 60
   handler          = "ebs-snapshot-janitor.lambda_handler"
   runtime          = "python2.7"
