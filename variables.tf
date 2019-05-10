@@ -32,3 +32,13 @@ variable "iam_role_name" {
   description = "Set name for iam role"
   default     = "lambda-backup-role"
 }
+
+variable "iam_role" {
+  description = "Set predefined IAM role"
+  default     = true
+}
+
+variable "create_iam_role" {
+  description = "Should the module create IAM role?"
+  default     = true
+}
