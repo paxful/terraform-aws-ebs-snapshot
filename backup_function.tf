@@ -64,7 +64,7 @@ resource "aws_lambda_function" "schedule_ebs_snapshot_backups" {
   filename         = "${path.module}/schedule-ebs-snapshot-backups.zip"
   function_name    = "${var.backup_lambda_name}"
   description      = "Automatically backs up instances tagged with backup: true"
-  role             = "${var.create_iam_role ? join("", aws_iam_role.ebs_backup_role.arn) : var.iam_role}"
+  role             = "${coalesce(join("", aws_iam_role.ebs_backup_role.*.arn), var.iam_role)}"
   timeout          = 60
   handler          = "schedule-ebs-snapshot-backups.lambda_handler"
   runtime          = "python2.7"
@@ -88,7 +88,7 @@ resource "aws_lambda_function" "ebs_snapshot_janitor" {
   filename         = "${path.module}/ebs-snapshot-janitor.zip"
   function_name    = "${var.retention_lambda_name}"
   description      = "Cleans up old EBS backups"
-  role             = "${var.create_iam_role ? join("", aws_iam_role.ebs_backup_role.arn) : var.iam_role}"
+  role             = "${coalesce(join("", aws_iam_role.ebs_backup_role.*.arn), var.iam_role)}"
   timeout          = 60
   handler          = "ebs-snapshot-janitor.lambda_handler"
   runtime          = "python2.7"
