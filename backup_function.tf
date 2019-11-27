@@ -1,5 +1,5 @@
 resource "aws_iam_role" "ebs_backup_role" {
-  count = var.create_iam_role
+  count = var.create_iam_role ? 1 : 0
   name  = var.iam_role_name
 
   assume_role_policy = <<EOF
@@ -21,7 +21,7 @@ EOF
 }
 
 resource "aws_iam_role_policy" "ebs_backup_policy" {
-  count = var.create_iam_role
+  count = var.create_iam_role ? 1 : 0
   name  = "ebs_backup_policy"
   role  = aws_iam_role.ebs_backup_role[0].id
 

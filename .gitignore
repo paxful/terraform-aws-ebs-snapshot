@@ -11,3 +11,4 @@
 
 # archive
 *.zip
+.terraform/
